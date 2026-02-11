@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^6.2.1
+  hive_ce: ^2.0.0
+  hive_ce_flutter: ^2.0.0
 
 dev_dependencies:
   flutter_test:

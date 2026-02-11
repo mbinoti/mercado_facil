@@ -14,12 +14,20 @@ import 'screens/screens_index_page.dart';
 import 'screens/search_results_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+import 'package:hive_ce_flutter/hive_flutter.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+  await Hive.openBox('settings');
+
   runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
+  //
 
   @override
   Widget build(BuildContext context) {
