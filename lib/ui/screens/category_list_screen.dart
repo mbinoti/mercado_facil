@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../app_routes.dart';
-import '../theme/app_theme.dart';
+import '../../app_routes.dart';
 import '../widgets/app_bottom_nav.dart';
 import '../widgets/badge_icon.dart';
 import '../widgets/filter_chip_button.dart';

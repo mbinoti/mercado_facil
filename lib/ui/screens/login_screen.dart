@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../app_routes.dart';
+import '../../app_routes.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/outline_action_button.dart';

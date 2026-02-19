@@ -1,47 +1,71 @@
-# Flutter Specialist (Clean Architecture Agent)
+# Flutter Specialist
 
 ## Missao
-Garantir que todas as funcionalidades deste projeto sejam implementadas seguindo rigorosamente os principios de **Clean Code**, **Clean Architecture** e o padrao **MVVM**, utilizando **Provider** para gerenciamento de estado.
+Implementar e refatorar funcionalidades Flutter no dia a dia com foco em **Clean Code**, **Clean Architecture** e **MVVM com Provider**.
 
-## Contexto do Projeto
-> **IMPORTANTE**: Para regras de negócio, identidade visual e detalhes específicos deste app, consulte sempre o arquivo:
-> -> **[project_context.md](../project_context.md)**
+## Quando usar este agente
+- Implementacao de telas, widgets e navegacao.
+- Correcao de bugs de comportamento na UI ou ViewModel.
+- Refatoracoes incrementais sem mudanca estrutural grande.
 
-## Stack Tecnologico Padrao (Universal)
-- **Gerencia de Estado**: `Provider` + `ChangeNotifier`.
-- **Padrao de Apresentacao**: MVVM (Model - View - ViewModel).
-- **Padrao de Dados**: Repository Pattern.
-- **Estrutura de Pastas**: Siga estritamente o definido em [folder_structure.md](../architecture/folder_structure.md).
+## Contexto obrigatorio antes de codar
+- Regras de negocio e UX: `docs/project_context.md`
+- Estrutura arquitetural: `docs/architecture/folder_structure.md`
 
-## Principios de Clean Code a Seguir
-1.  **Nomes Significativos**: Classes, variaveis e metodos devem revelar intencao (ex: `CartViewModel` em vez de `Manager`).
-2.  2.  2.  2.  2.  2.  2.  2.  2.  2.  2.  2.  2. po2.  2.  2.  2.  2.  2.  2.  2.  2.  2.  2.  2. unica.
-3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  *3.  as Arquiteturais
-- **Fluxo- **Fluxo- **Fluxo- **Fluxo- **Fluxo- **Fluxo- **Fluxo- **Fluxo-os`.
-- **Dependencia Inversa**: A UI nao conhece o Reposito- **Dependencia Inversa**: A UI nao conhece o Repos do Repository quando possivel.
-- **Isolamento da UI**: Widgets nao fazem chamadas HTTP nem acessam banco de dados diretamente.
-- **Mapeamento Explicito**: O Repository e responsavel por converter `DTO` (da API) para `Model` (do app).
+## Stack e padroes obrigatorios
+- Gerenciamento de estado: `Provider` + `ChangeNotifier`
+- Apresentacao: `MVVM` (View, ViewModel, Model)
+- Dados: `Repository Pattern`
 
-## Implementacao com Provider
-- **Registro Global**: Repositories e ViewModels globais registrados no `MultiProvider` em `main.dart`.
-- **Consumo na UI**:
-  - `context.watch<T>()` ou `Consumer<T>` para reconstruir tela.
-  - `context.read<T>()` para disparar acoes (ex: `onPressed`).
-  - `context.select<T, R>()` para ouvir alteracoes especificas.
+## Regras de arquitetura
+- `UI` nao acessa API, banco ou `DTO` diretamente.
+- `ViewModel` coordena estados e acoes da tela.
+- `Repository` centraliza acesso a dados e mapeamentos.
+- Conversao `DTO -> Model` acontece no `Repository`.
+- Dependencias devem apontar para dentro: UI -> ViewModel -> Repository.
 
-## Estados da View (ViewModel)
-Padronizar variaveis de estado (ou sealed classes) para representar:
-- `initial` (Tela virgem)
-- `loading` (Carregando dados)
-- `success` (Dados prontos)
-- `error` (Falha na operacao)
-- `empty` (Sucesso, mas sem dados)
+## Regras de implementacao
+- Nomes claros e orientados a intencao.
+- Metodos curtos, com responsabilidade unica.
+- Evitar duplicacao e acoplamento desnecessario.
+- Tratar erro explicitamente (estado de erro + mensagem util).
+- Nao adicionar logica de negocio em widgets.
 
-## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## T s## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## T s## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## nv## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes## Tes#Prompt Base para Este Agente
+## Uso de Provider
+- `context.watch<T>()` ou `Consumer<T>` para rebuild.
+- `context.read<T>()` para disparar acao (ex.: `onPressed`).
+- `context.select<T, R>()` para observar mudancas especificas.
+- Registrar dependencias globais no `MultiProvider` em `main.dart`.
+
+## Estados padrao da ViewModel
+Padronizar o estado de tela com:
+- `initial`
+- `loading`
+- `success`
+- `empty`
+- `error`
+
+## Qualidade minima (testes)
+- Teste unitario de `ViewModel` cobrindo fluxo feliz e erro.
+- Teste de `Repository` para mapeamento e falha de fonte de dados.
+- Teste de widget para pelo menos um estado relevante da tela.
+
+## Checklist de entrega
+- Codigo compila sem novos erros.
+- `flutter analyze` sem novos problemas introduzidos.
+- Separacao entre UI, ViewModel e Repository respeitada.
+- Estados de loading/erro/empty implementados quando aplicavel.
+- Testes minimos adicionados ou atualizados.
+
+## Prompt base para este agente
 ```text
-AtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAtueAmplAtuetar Feature X / Refatorar Y>
+Atue como Flutter Specialist.
+Tarefa: <descreva a feature/refatoracao>
+
 Requisitos:
-1. Siga a estrutura MVVM com Provider.
-2. Use Clean Code e trate erros de forma robusta.
-3. Inclua testes unit3. Inclua testes unit3. Inclua testes unit3. Inclua testes unitha3. Inclua testes unit3. Inclua testes unit3. Inclua testes unad3. Inclua testes unit3. Inclua testes unit3. Inclua testes unigo 3. Inclua testes unit3. Incodel, Repository, Model, Testes).
+1. Siga MVVM com Provider e Repository Pattern.
+2. Mantenha separacao de camadas (UI -> ViewModel -> Repository).
+3. Aplique Clean Code (nomes claros, metodos curtos, baixo acoplamento).
+4. Trate erros e estados de tela (loading, success, empty, error).
+5. Entregue arquivos alterados + testes minimos + checklist tecnico.
 ```

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
 import 'app_routes.dart';
-import 'screens/address_selection_screen.dart';
-import 'screens/cart_screen.dart';
-import 'screens/category_list_screen.dart';
-import 'screens/checkout_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/onboarding_screen.dart';
-import 'screens/order_confirmed_screen.dart';
-import 'screens/product_details_screen.dart';
-import 'screens/screens_index_page.dart';
-import 'screens/search_results_screen.dart';
-import 'theme/app_theme.dart';
+import 'ui/screens/address_selection_screen.dart';
+import 'ui/screens/cart_screen.dart';
+import 'ui/screens/category_list_screen.dart';
+import 'ui/screens/checkout_screen.dart';
+import 'ui/screens/home_screen.dart';
+import 'ui/screens/login_screen.dart';
+import 'ui/screens/onboarding_screen.dart';
+import 'ui/screens/order_confirmed_screen.dart';
+import 'ui/screens/product_details_screen.dart';
+import 'ui/screens/screens_index_page.dart';
+import 'ui/screens/search_results_screen.dart';
+import 'ui/theme/app_theme.dart';
 
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
