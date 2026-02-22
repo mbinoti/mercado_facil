@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_routes.dart';
+import '../../model/hive/hive_models.dart';
 import '../theme/app_theme.dart';
 import '../widgets/primary_button.dart';
 
@@ -13,6 +14,13 @@ class OrderConfirmedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final order = MercadoSeedData.pedidoConfirmado;
+    final inicio = order.estimativaInicio;
+    final fim = order.estimativaFim;
+    final janelaEntrega = (inicio != null && fim != null)
+        ? '${formatHorario(inicio)} - ${formatHorario(fim)}'
+        : 'A definir';
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -26,9 +34,9 @@ class OrderConfirmedScreen extends StatelessWidget {
                 child: Icon(Icons.check, size: 36, color: Colors.white),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Pedido #1234 Realizado!',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+              Text(
+                'Pedido ${order.numeroExibicao} Realizado!',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 6),
               const Text(
@@ -44,11 +52,11 @@ class OrderConfirmedScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.timer, color: kGreen),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'PREVISAO DE ENTREGA',
                             style: TextStyle(
                               fontSize: 11,
@@ -56,12 +64,12 @@ class OrderConfirmedScreen extends StatelessWidget {
                               color: kGreenDark,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            '14:45 - 15:10',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                            janelaEntrega,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text('Hoje', style: TextStyle(color: kTextMuted)),
+                          const Text('Hoje', style: TextStyle(color: kTextMuted)),
                         ],
                       ),
                     ),
@@ -91,11 +99,11 @@ class OrderConfirmedScreen extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
-                    const Text('5 itens'),
+                    Text('${order.resumo.itensQuantidade} itens'),
                     const SizedBox(width: 6),
-                    const Text(
-                      'R\$ 124,90',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    Text(
+                      formatMoedaCents(order.resumo.totalCents),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     const Icon(Icons.expand_more),
                   ],
@@ -106,13 +114,13 @@ class OrderConfirmedScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: cardDecoration(radius: 16),
                 child: Row(
-                  children: const [
-                    Icon(Icons.location_on, color: kGreen),
-                    SizedBox(width: 10),
+                  children: [
+                    const Icon(Icons.location_on, color: kGreen),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Av. Paulista, 1000 - Bela Vista\nApt 42 - Sao Paulo, SP',
-                        style: TextStyle(color: kTextMuted, height: 1.3),
+                        order.enderecoEntregaTexto,
+                        style: const TextStyle(color: kTextMuted, height: 1.3),
                       ),
                     ),
                   ],

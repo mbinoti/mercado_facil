@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hive_ce/hive.dart';
 
 import '../../app_routes.dart';
+import '../../model/hive/fake_hive_repository.dart';
+import '../../model/hive/hive_models.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_bottom_nav.dart';
 import '../widgets/app_text_field.dart';
@@ -15,8 +18,28 @@ class SearchResultsScreen extends StatelessWidget {
     Navigator.pushNamed(context, AppRoutes.cart);
   }
 
+  Future<void> _addAndOpenCart(
+    BuildContext context,
+    ProdutoHive product,
+  ) async {
+    final added = await FakeHiveRepository.addProductToCart(product);
+    if (!context.mounted) {
+      return;
+    }
+    if (!added) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Produto indisponivel para adicionar')),
+      );
+      return;
+    }
+    _goToCart(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    const query = 'Arroz';
+    final results = MercadoSeedData.buscarProdutos(query);
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -44,7 +67,15 @@ class SearchResultsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const BadgeIcon(icon: Icons.shopping_cart, badge: '2'),
+                  ValueListenableBuilder<Box<dynamic>>(
+                    valueListenable: FakeHiveRepository.cartListenable(),
+                    builder: (context, box, child) {
+                      return BadgeIcon(
+                        icon: Icons.shopping_cart,
+                        badge: FakeHiveRepository.cartItemsCount().toString(),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -61,53 +92,37 @@ class SearchResultsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Encontrados 42 produtos para "Arroz"',
-                  style: TextStyle(color: kTextMuted),
+                  'Encontrados ${results.length} produtos para "$query"',
+                  style: const TextStyle(color: kTextMuted),
                 ),
               ),
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: ListView(
+              child: ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  SearchProductCard(
-                    name: 'Arroz Tio Joao Branco',
-                    subtitle: 'Pacote 5kg',
-                    price: 'R\$ 24,90',
-                    oldPrice: 'R\$ 29,90',
-                    tag: 'MAIS VENDIDO',
-                    onAdd: () => _goToCart(context),
-                  ),
-                  const SizedBox(height: 12),
-                  SearchProductCard(
-                    name: 'Arroz Camil Parboilizado',
-                    subtitle: 'Pacote 1kg',
-                    price: 'R\$ 6,50',
-                    onAdd: () => _goToCart(context),
-                  ),
-                  const SizedBox(height: 12),
-                  SearchProductCard(
-                    name: 'Arroz Integral Prato Fino',
-                    subtitle: 'Pacote 1kg',
-                    price: 'R\$ 5,90',
-                    oldPrice: 'R\$ 7,20',
-                    tag: '15% OFF',
-                    onAdd: () => _goToCart(context),
-                  ),
-                  const SizedBox(height: 12),
-                  const SearchProductCard(
-                    name: 'Arroz Arboreo Paganini',
-                    subtitle: 'Caixa 1kg',
-                    price: 'R\$ 22,90',
-                    soldOut: true,
-                  ),
-                ],
+                itemCount: results.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final product = results[index];
+                  return SearchProductCard(
+                    name: product.nome,
+                    subtitle: product.subtitulo,
+                    price: formatMoedaCents(product.precoCents),
+                    oldPrice: product.precoAntigoCents == null
+                        ? null
+                        : formatMoedaCents(product.precoAntigoCents!),
+                    tag: product.badge,
+                    soldOut: product.esgotado,
+                    onAdd: () => _addAndOpenCart(context, product),
+                  );
+                },
               ),
             ),
           ],

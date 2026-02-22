@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_routes.dart';
+import '../../model/hive/hive_models.dart';
 import '../theme/app_theme.dart';
 import '../widgets/payment_option.dart';
 import '../widgets/primary_button.dart';
@@ -15,6 +16,13 @@ class CheckoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final checkout = MercadoSeedData.checkout;
+    final endereco = MercadoSeedData.enderecos.firstWhere(
+      (e) => e.id == checkout.enderecoId,
+      orElse: () => MercadoSeedData.enderecoSelecionado,
+    );
+    final totalItens = MercadoSeedData.totalItensCarrinho;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Pagamento e Checkout')),
       body: SingleChildScrollView(
@@ -42,17 +50,24 @@ class CheckoutScreen extends StatelessWidget {
                     child: const Icon(Icons.map, color: kTextMuted),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Casa', style: TextStyle(fontWeight: FontWeight.w600)),
                         Text(
-                          'Rua das Flores, 123 - Apt 402',
-                          style: TextStyle(color: kTextMuted, fontSize: 12),
+                          endereco.apelido,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        SizedBox(height: 4),
                         Text(
+                          enderecoLinhaCurta(
+                            endereco.logradouro,
+                            endereco.numero,
+                            endereco.bairro,
+                          ),
+                          style: const TextStyle(color: kTextMuted, fontSize: 12),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
                           '25-50 min',
                           style: TextStyle(color: kGreenDark, fontSize: 12),
                         ),
@@ -60,7 +75,7 @@ class CheckoutScreen extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () => Navigator.pushNamed(context, AppRoutes.address),
                     child: const Text(
                       'Alterar',
                       style: TextStyle(color: kGreen, fontWeight: FontWeight.w600),
@@ -75,24 +90,25 @@ class CheckoutScreen extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.w700, color: kTextMuted),
             ),
             const SizedBox(height: 10),
-            const Row(
+            Row(
               children: [
                 PaymentOption(
                   label: 'Pix',
                   icon: Icons.qr_code,
-                  selected: true,
+                  selected: checkout.metodoPagamento == MetodoPagamentoHive.pix,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 PaymentOption(
                   label: 'Cartao',
                   icon: Icons.credit_card,
-                  selected: false,
+                  selected: checkout.metodoPagamento == MetodoPagamentoHive.cartao,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 PaymentOption(
                   label: 'Carteira',
                   icon: Icons.account_balance_wallet,
-                  selected: false,
+                  selected:
+                      checkout.metodoPagamento == MetodoPagamentoHive.carteira,
                 ),
               ],
             ),
@@ -100,8 +116,8 @@ class CheckoutScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: cardDecoration(radius: 16),
-              child: Row(
-                children: const [
+              child: const Row(
+                children: [
                   CircleAvatar(
                     backgroundColor: kGreen,
                     radius: 18,
@@ -128,20 +144,26 @@ class CheckoutScreen extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: cardDecoration(radius: 16),
               child: Column(
-                children: const [
-                  SummaryRow(label: 'Subtotal (12 itens)', value: 'R\$ 84,63'),
-                  SizedBox(height: 6),
-                  SummaryRow(label: 'Frete', value: 'R\$ 5,00'),
-                  SizedBox(height: 6),
+                children: [
+                  SummaryRow(
+                    label: 'Subtotal ($totalItens itens)',
+                    value: formatMoedaCents(checkout.subtotalCents),
+                  ),
+                  const SizedBox(height: 6),
+                  SummaryRow(
+                    label: 'Frete',
+                    value: formatMoedaCents(checkout.freteCents),
+                  ),
+                  const SizedBox(height: 6),
                   SummaryRow(
                     label: 'Desconto Pix (5%)',
-                    value: '- R\$ 4,23',
+                    value: formatMoedaCents(-checkout.descontoCents),
                     valueColor: kGreenDark,
                   ),
-                  Divider(height: 24),
+                  const Divider(height: 24),
                   SummaryRow(
                     label: 'Total',
-                    value: 'R\$ 85,40',
+                    value: formatMoedaCents(checkout.totalCents),
                     bold: true,
                   ),
                 ],

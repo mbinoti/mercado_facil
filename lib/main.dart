@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'app_routes.dart';
 import 'ui/screens/address_selection_screen.dart';
@@ -13,14 +15,33 @@ import 'ui/screens/product_details_screen.dart';
 import 'ui/screens/screens_index_page.dart';
 import 'ui/screens/search_results_screen.dart';
 import 'ui/theme/app_theme.dart';
+import 'model/hive/fake_hive_repository.dart';
 
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
+void _disableDebugVisualOverlays() {
+  debugPaintBaselinesEnabled = false;
+  debugPaintSizeEnabled = false;
+  debugPaintPointersEnabled = false;
+  debugPaintLayerBordersEnabled = false;
+  debugRepaintRainbowEnabled = false;
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _disableDebugVisualOverlays();
+  SchedulerBinding.instance.addPersistentFrameCallback((_) {
+    if (debugPaintBaselinesEnabled ||
+        debugPaintSizeEnabled ||
+        debugPaintPointersEnabled ||
+        debugPaintLayerBordersEnabled ||
+        debugRepaintRainbowEnabled) {
+      _disableDebugVisualOverlays();
+    }
+  });
 
   await Hive.initFlutter();
-  await Hive.openBox('settings');
+  await FakeHiveRepository.initialize();
 
   runApp(const MainApp());
 }

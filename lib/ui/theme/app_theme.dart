@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -12,7 +13,9 @@ const kDanger = Color(0xFFF87171);
 const kBlack = Color(0xFF0B0B0B);
 
 ThemeData buildAppTheme() {
-  final base = ThemeData(useMaterial3: true);
+  final base = ThemeData(
+    useMaterial3: defaultTargetPlatform == TargetPlatform.android,
+  );
   final baseTextTheme = GoogleFonts.manropeTextTheme(base.textTheme);
   return base.copyWith(
     colorScheme: ColorScheme.fromSeed(

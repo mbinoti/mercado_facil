@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../app_routes.dart';
+import '../../model/hive/fake_hive_repository.dart';
+import '../../model/hive/hive_models.dart';
 import '../theme/app_theme.dart';
 import '../widgets/counter_control.dart';
 import '../widgets/info_card.dart';
@@ -12,8 +14,41 @@ class ProductDetailsScreen extends StatelessWidget {
     Navigator.pushNamed(context, AppRoutes.cart);
   }
 
+  Future<void> _addToCartAndGo(
+    BuildContext context,
+    ProdutoHive product,
+  ) async {
+    final added = await FakeHiveRepository.addProductToCart(product);
+    if (!context.mounted) {
+      return;
+    }
+    if (!added) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Produto indisponivel para adicionar')),
+      );
+      return;
+    }
+    _goToCart(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final product = MercadoSeedData.produtoPrincipal;
+    final nutricional = product.infoNutricional;
+    final nutritionCards = <({String title, String value})>[
+      if (nutricional?.caloriasKcal != null)
+        (
+          title: 'Calorias',
+          value: '${nutricional!.caloriasKcal!.toInt()} kcal',
+        ),
+      if (nutricional?.carboidratosG != null)
+        (title: 'Carboidratos', value: '${nutricional!.carboidratosG!}g'),
+      if (nutricional?.potassioMg != null)
+        (title: 'Potassio', value: '${nutricional!.potassioMg!.toInt()}mg'),
+      if (nutricional?.fibrasG != null)
+        (title: 'Fibras', value: '${nutricional!.fibrasG!}g'),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -23,7 +58,9 @@ class ProductDetailsScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.favorite_border),
+            icon: Icon(
+              product.favorito ? Icons.favorite : Icons.favorite_border,
+            ),
           ),
         ],
       ),
@@ -40,23 +77,28 @@ class ProductDetailsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Center(
-                child:
-                    Icon(Icons.local_grocery_store, size: 60, color: kTextMuted),
+                child: Icon(
+                  Icons.local_grocery_store,
+                  size: 60,
+                  color: kTextMuted,
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Banana Prata',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+            Text(
+              product.nome,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
-            const Text('R\$ 7,99 / kg',
-                style: TextStyle(color: kGreenDark, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 4),
-            const Text(
-              'Aprox. 6 unidades por kg',
-              style: TextStyle(color: kTextMuted),
+            Text(
+              formatPrecoProduto(product.precoCents, product.unidade),
+              style: const TextStyle(
+                color: kGreenDark,
+                fontWeight: FontWeight.w600,
+              ),
             ),
+            const SizedBox(height: 4),
+            Text(product.subtitulo, style: const TextStyle(color: kTextMuted)),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(14),
@@ -66,7 +108,7 @@ class ProductDetailsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: kGreen.withOpacity(0.12),
+                      color: kGreen.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.fitness_center, color: kGreen),
@@ -113,9 +155,9 @@ class ProductDetailsScreen extends StatelessWidget {
                     ),
                   ),
                   Switch(
-                    value: true,
+                    value: product.aceitaSubstituicaoPadrao,
                     onChanged: (_) {},
-                    activeColor: kGreen,
+                    activeThumbColor: kGreen,
                   ),
                 ],
               ),
@@ -126,54 +168,62 @@ class ProductDetailsScreen extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Bananas prata frescas, selecionadas e de origem controlada.',
-              style: TextStyle(color: kTextMuted),
+            Text(
+              product.descricao ?? 'Sem descricao.',
+              style: const TextStyle(color: kTextMuted),
             ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => _goToCart(context),
+                onPressed: () => _addToCartAndGo(context, product),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kGreen,
                   foregroundColor: Colors.white,
                   elevation: 0,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 20,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('ADICIONAR', style: TextStyle(fontWeight: FontWeight.w700)),
-                    Text('R\$ 7,99', style: TextStyle(fontWeight: FontWeight.w700)),
+                    const Text(
+                      'ADICIONAR',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    Text(
+                      formatMoedaCents(product.precoCents),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Informacao Nutricional',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 10),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 2.6,
-              children: const [
-                InfoCard(title: 'Calorias', value: '89 kcal'),
-                InfoCard(title: 'Carboidratos', value: '23g'),
-                InfoCard(title: 'Potassio', value: '358mg'),
-                InfoCard(title: 'Fibras', value: '2.6g'),
-              ],
-            ),
+            if (nutritionCards.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Informacao Nutricional',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 2.6,
+                children: [
+                  for (final card in nutritionCards)
+                    InfoCard(title: card.title, value: card.value),
+                ],
+              ),
+            ],
           ],
         ),
       ),
