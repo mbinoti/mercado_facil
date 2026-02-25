@@ -39,6 +39,8 @@ Future<void> main() async {
       _disableDebugVisualOverlays();
     }
   });
+  // eu tenho medo desse negocio
+  // de ser normal.
 
   await Hive.initFlutter();
   await FakeHiveRepository.initialize();

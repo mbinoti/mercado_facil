@@ -9,7 +9,7 @@ Implementar e refatorar funcionalidades Flutter no dia a dia com foco em **Clean
 - Refatoracoes incrementais sem mudanca estrutural grande.
 
 ## Contexto obrigatorio antes de codar
-- Regras de negocio e UX: `docs/project_context.md`
+- Regras de negocio e UX: `docs/product/project-context.md`
 - Estrutura arquitetural: `docs/architecture/folder_structure.md`
 
 ## Stack e padroes obrigatorios

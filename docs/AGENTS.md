@@ -17,9 +17,10 @@ Padronizar como cada tarefa e feita para reduzir retrabalho, manter consistencia
 ## Fluxo recomendado
 
 1. Escolher o agente pelo tipo de tarefa.
-2. Validar contexto tecnico em `docs/architecture/README.md`.
-3. Para mudancas estruturais, seguir `docs/architecture/folder_structure.md`.
-4. Executar implementacao e fechar com checklist do agente.
+2. Validar contexto de produto em `docs/product/project-context.md` antes de implementar features.
+3. Validar contexto tecnico em `docs/architecture/README.md`.
+4. Para mudancas estruturais, seguir `docs/architecture/folder_structure.md`.
+5. Executar implementacao e fechar com checklist do agente.
 
 ## Regras comuns para qualquer agente
 
@@ -28,6 +29,14 @@ Padronizar como cada tarefa e feita para reduzir retrabalho, manter consistencia
 - Preferir mudancas pequenas e incrementais.
 - Sempre listar riscos tecnicos antes de grandes refactors.
 - Garantir que o codigo compile e que `flutter analyze` nao introduza novos erros.
+
+## UI / Produto
+
+- Para features de produto, consultar `docs/product/project-context.md` antes de codar.
+- Para tarefas de telas, fluxos e componentes do app, consulte `docs/product/telas-stitch.md` como contexto base.
+- Se existir especificacao detalhada da feature (ex.: `docs/analise-requisitos.md` com requisitos, criterios de aceite e lacunas), consultar esse arquivo antes de codar e usar como referencia detalhada da entrega.
+- Preservar a ordem e intencao dos fluxos descritos nesse arquivo.
+- Se houver divergencia entre codigo e documento, sinalizar e propor atualizacao.
 
 ## Proximos agentes sugeridos
 

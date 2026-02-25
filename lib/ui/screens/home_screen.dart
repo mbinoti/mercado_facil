@@ -45,124 +45,133 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enderecoSelecionado = MercadoSeedData.enderecoSelecionado;
-    final weeklyOffers = MercadoSeedData.ofertas
-        .map(_weeklyOfferFromHive)
-        .toList(growable: false);
-    final homeCategories = MercadoSeedData.categorias
-        .take(5)
-        .map(_homeCategoryFromHive)
-        .toList(growable: false);
-    final homeProducts = MercadoSeedData.produtosHome
-        .map(_homeProductFromHive)
-        .toList(growable: false);
+    return AnimatedBuilder(
+      animation: FakeHiveRepository.homeDataListenable(),
+      builder: (context, child) {
+        final enderecoSelecionado = FakeHiveRepository.getSelectedAddress();
+        final weeklyOffers = FakeHiveRepository.getHomeOffers()
+            .map(_weeklyOfferFromHive)
+            .toList(growable: false);
+        final homeCategories = FakeHiveRepository.getHomeCategories()
+            .take(5)
+            .map(_homeCategoryFromHive)
+            .toList(growable: false);
+        final homeProducts = FakeHiveRepository.getHomeProducts()
+            .map(_homeProductFromHive)
+            .toList(growable: false);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F0),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 0),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _DeliveryHeader(
-                onAddressTap: () => _goToAddress(context),
-                addressLine:
-                    '${enderecoSelecionado.logradouro}, ${enderecoSelecionado.numero}',
-              ),
-              const SizedBox(height: 12),
-              _SearchShortcut(onTap: () => _goToSearch(context)),
-              const SizedBox(height: 18),
-              _SectionTitleRow(
-                title: 'Ofertas da Semana',
-                action: 'Ver tudo',
-                onTap: () => _goToCategories(context),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 126,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: weeklyOffers.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final offer = weeklyOffers[index];
-                    return _WeeklyOfferCard(
-                      data: offer,
-                      onTap: () => _goToCategories(context),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (final category in homeCategories)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: _CategoryShortcut(
-                          data: category,
+        return Scaffold(
+          backgroundColor: const Color(0xFFF0F2F0),
+          bottomNavigationBar: const AppBottomNav(currentIndex: 0),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _DeliveryHeader(
+                    onAddressTap: () => _goToAddress(context),
+                    addressLine:
+                        '${enderecoSelecionado.logradouro}, ${enderecoSelecionado.numero}',
+                  ),
+                  const SizedBox(height: 12),
+                  _SearchShortcut(onTap: () => _goToSearch(context)),
+                  const SizedBox(height: 18),
+                  _SectionTitleRow(
+                    title: 'Ofertas da Semana',
+                    action: 'Ver tudo',
+                    onTap: () => _goToCategories(context),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 170,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: weeklyOffers.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final offer = weeklyOffers[index];
+                        return _WeeklyOfferCard(
+                          data: offer,
                           onTap: () => _goToCategories(context),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final category in homeCategories)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16),
+                            child: _CategoryShortcut(
+                              data: category,
+                              onTap: () => _goToCategories(context),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Text(
+                        'Ofertas do dia',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 31,
                         ),
                       ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Text(
-                    'Ofertas do dia',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 31),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFDCDD),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Text(
-                      'EXPIRA EM 12H',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFFE32C33),
-                        fontWeight: FontWeight.w800,
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFDCDD),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Text(
+                          'EXPIRA EM 12H',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFFE32C33),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: homeProducts.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.61,
+                        ),
+                    itemBuilder: (context, index) {
+                      return _HomeProductCard(
+                        data: homeProducts[index],
+                        onTap: () => _goToProduct(context),
+                        onAdd: () => _addToCart(context, homeProducts[index].id),
+                      );
+                    },
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: homeProducts.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.61,
-                ),
-                itemBuilder: (context, index) {
-                  return _HomeProductCard(
-                    data: homeProducts[index],
-                    onTap: () => _goToProduct(context),
-                    onAdd: () => _addToCart(context, homeProducts[index].id),
-                  );
-                },
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -359,78 +368,82 @@ class _WeeklyOfferCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -14,
-                bottom: -8,
-                child: _OfferDecor(accent: data.decorAccent),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 10, 10, 9),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF08F96E),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        data.tag,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 10,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact = constraints.maxWidth < 210;
+              final titleFontSize = isCompact ? 26.0 : 34.0;
+              final tagFontSize = isCompact ? 9.0 : 10.0;
+              final subtitleFontSize = isCompact ? 10.5 : 12.0;
+              final verticalPadding = isCompact ? 8.0 : 10.0;
+
+              return Stack(
+                children: [
+                  Positioned(
+                    right: -14,
+                    bottom: -8,
+                    child: _OfferDecor(
+                      accent: data.decorAccent,
+                      scale: isCompact ? 0.86 : 1,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      10,
+                      verticalPadding,
+                      10,
+                      isCompact ? 8 : 9,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isCompact ? 7 : 8,
+                            vertical: isCompact ? 3 : 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF08F96E),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            data.tag,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w800,
+                              fontSize: tagFontSize,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      data.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 34,
-                        height: 1.05,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      data.subtitle,
-                      style: const TextStyle(
-                        color: Color(0xFFEAF2EA),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        'Comprar',
-                        style: TextStyle(
-                          color: Color(0xFF2D3130),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
+                        SizedBox(height: isCompact ? 6 : 8),
+                        Text(
+                          data.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: titleFontSize,
+                            height: isCompact ? 1 : 1.05,
+                          ),
                         ),
-                      ),
+                        const Spacer(),
+                        SizedBox(height: isCompact ? 2 : 3),
+                        Text(
+                          data.subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: const Color(0xFFEAF2EA),
+                            fontWeight: FontWeight.w600,
+                            fontSize: subtitleFontSize,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -440,48 +453,53 @@ class _WeeklyOfferCard extends StatelessWidget {
 
 class _OfferDecor extends StatelessWidget {
   final Color accent;
+  final double scale;
 
-  const _OfferDecor({required this.accent});
+  const _OfferDecor({required this.accent, this.scale = 1});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 104,
-      height: 104,
-      child: Stack(
-        children: [
-          Positioned(
-            right: 10,
-            top: 10,
-            child: CircleAvatar(
-              radius: 19,
-              backgroundColor: accent.withValues(alpha: 0.85),
+    return Transform.scale(
+      scale: scale,
+      alignment: Alignment.bottomRight,
+      child: SizedBox(
+        width: 104,
+        height: 104,
+        child: Stack(
+          children: [
+            Positioned(
+              right: 10,
+              top: 10,
+              child: CircleAvatar(
+                radius: 19,
+                backgroundColor: accent.withValues(alpha: 0.85),
+              ),
             ),
-          ),
-          Positioned(
-            left: 16,
-            bottom: 6,
-            child: CircleAvatar(
-              radius: 21,
-              backgroundColor: accent.withValues(alpha: 0.65),
+            Positioned(
+              left: 16,
+              bottom: 6,
+              child: CircleAvatar(
+                radius: 21,
+                backgroundColor: accent.withValues(alpha: 0.65),
+              ),
             ),
-          ),
-          Positioned(
-            right: 22,
-            bottom: 18,
-            child: Transform.rotate(
-              angle: 0.35,
-              child: Container(
-                width: 44,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: accent,
-                  borderRadius: BorderRadius.circular(10),
+            Positioned(
+              right: 22,
+              bottom: 18,
+              child: Transform.rotate(
+                angle: 0.35,
+                child: Container(
+                  width: 44,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: accent,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -21,6 +21,12 @@ abstract final class FakeHiveRepository {
 
   static const _currentSessionKey = 'current';
   static const _activeCartKey = 'active';
+  static const _homeProductIds = <String>[
+    'prd_banana_prata',
+    'prd_arroz_tio_joao_5kg',
+    'prd_leite_integral_1l',
+    'prd_coca_zero_2l',
+  ];
 
   static Future<void> initialize() async {
     await _openRequiredBoxes();
@@ -29,6 +35,16 @@ abstract final class FakeHiveRepository {
 
   static ValueListenable<Box<dynamic>> cartListenable() {
     return Hive.box<dynamic>(HiveBoxes.cart).listenable(keys: [_activeCartKey]);
+  }
+
+  static Listenable homeDataListenable() {
+    return Listenable.merge(<Listenable>[
+      Hive.box<dynamic>(HiveBoxes.session).listenable(keys: [_currentSessionKey]),
+      Hive.box<dynamic>(HiveBoxes.addresses).listenable(),
+      Hive.box<dynamic>(HiveBoxes.categories).listenable(),
+      Hive.box<dynamic>(HiveBoxes.offers).listenable(),
+      Hive.box<dynamic>(HiveBoxes.products).listenable(keys: _homeProductIds),
+    ]);
   }
 
   static CarrinhoHive getCart() {
@@ -42,6 +58,122 @@ abstract final class FakeHiveRepository {
 
   static int cartItemsCount() {
     return getCart().itens.length;
+  }
+
+  static EnderecoHive getSelectedAddress() {
+    final addresses = getAddresses();
+    if (addresses.isEmpty) {
+      return MercadoSeedData.enderecoSelecionado;
+    }
+
+    final session = getCurrentSession();
+    final selectedId = session?.enderecoSelecionadoId;
+    if (selectedId != null) {
+      for (final address in addresses) {
+        if (address.id == selectedId) {
+          return address;
+        }
+      }
+    }
+
+    for (final address in addresses) {
+      if (address.padrao) {
+        return address;
+      }
+    }
+    return addresses.first;
+  }
+
+  static SessaoAppHive? getCurrentSession() {
+    final sessionBox = Hive.box<dynamic>(HiveBoxes.session);
+    final raw = sessionBox.get(_currentSessionKey);
+    if (raw is SessaoAppHive) {
+      return raw;
+    }
+    if (raw is Map) {
+      return _sessionFromMap(Map<String, dynamic>.from(raw));
+    }
+    return null;
+  }
+
+  static List<EnderecoHive> getAddresses() {
+    final addressesBox = Hive.box<dynamic>(HiveBoxes.addresses);
+    final addresses = <EnderecoHive>[];
+    for (final raw in addressesBox.values) {
+      if (raw is EnderecoHive) {
+        addresses.add(raw);
+        continue;
+      }
+      if (raw is Map) {
+        addresses.add(_addressFromMap(Map<String, dynamic>.from(raw)));
+      }
+    }
+    if (addresses.isEmpty) {
+      return MercadoSeedData.enderecos;
+    }
+    return addresses;
+  }
+
+  static List<CategoriaHive> getHomeCategories() {
+    final categoriesBox = Hive.box<dynamic>(HiveBoxes.categories);
+    final categories = <CategoriaHive>[];
+    for (final raw in categoriesBox.values) {
+      if (raw is CategoriaHive) {
+        categories.add(raw);
+        continue;
+      }
+      if (raw is Map) {
+        categories.add(_categoryFromMap(Map<String, dynamic>.from(raw)));
+      }
+    }
+    if (categories.isEmpty) {
+      return MercadoSeedData.categorias.where((c) => c.ativa).toList(growable: false);
+    }
+    categories.sort((a, b) => a.ordem.compareTo(b.ordem));
+    return categories.where((category) => category.ativa).toList(growable: false);
+  }
+
+  static List<OfertaHive> getHomeOffers() {
+    final offersBox = Hive.box<dynamic>(HiveBoxes.offers);
+    final offers = <OfertaHive>[];
+    for (final raw in offersBox.values) {
+      if (raw is OfertaHive) {
+        offers.add(raw);
+        continue;
+      }
+      if (raw is Map) {
+        offers.add(_offerFromMap(Map<String, dynamic>.from(raw)));
+      }
+    }
+    if (offers.isEmpty) {
+      return MercadoSeedData.ofertas;
+    }
+    offers.sort((a, b) => a.inicioEm.compareTo(b.inicioEm));
+    return offers;
+  }
+
+  static List<ProdutoHive> getHomeProducts() {
+    final productsBox = Hive.box<dynamic>(HiveBoxes.products);
+    final productsById = <String, ProdutoHive>{};
+
+    for (final id in _homeProductIds) {
+      final raw = productsBox.get(id);
+      if (raw is ProdutoHive) {
+        productsById[id] = raw;
+        continue;
+      }
+      if (raw is Map) {
+        productsById[id] = _productFromMap(Map<String, dynamic>.from(raw));
+      }
+    }
+
+    if (productsById.length == _homeProductIds.length) {
+      return _homeProductIds
+          .map((id) => productsById[id]!)
+          .toList(growable: false);
+    }
+
+    return MercadoSeedData.produtosHome;
   }
 
   static ProdutoHive? getProductById(String productId) {
@@ -509,5 +641,65 @@ abstract final class FakeHiveRepository {
       return const <String>[];
     }
     return rawList.map((value) => value.toString()).toList(growable: false);
+  }
+
+  static SessaoAppHive _sessionFromMap(Map<String, dynamic> map) {
+    return SessaoAppHive(
+      onboardingConcluido: map['onboardingConcluido'] == true,
+      usuarioLogadoId: map['usuarioLogadoId']?.toString(),
+      enderecoSelecionadoId: map['enderecoSelecionadoId']?.toString(),
+      ultimoAcessoEm: _readDate(map['ultimoAcessoEm']),
+    );
+  }
+
+  static EnderecoHive _addressFromMap(Map<String, dynamic> map) {
+    return EnderecoHive(
+      id: (map['id'] ?? '').toString(),
+      usuarioId: (map['usuarioId'] ?? '').toString(),
+      apelido: (map['apelido'] ?? '').toString(),
+      logradouro: (map['logradouro'] ?? '').toString(),
+      numero: (map['numero'] ?? '').toString(),
+      bairro: (map['bairro'] ?? '').toString(),
+      cidade: (map['cidade'] ?? '').toString(),
+      estado: (map['estado'] ?? '').toString(),
+      cep: (map['cep'] ?? '').toString(),
+      complemento: map['complemento'] as String?,
+      referencia: map['referencia'] as String?,
+      latitude: _readNullableDouble(map['latitude']),
+      longitude: _readNullableDouble(map['longitude']),
+      padrao: map['padrao'] == true,
+    );
+  }
+
+  static CategoriaHive _categoryFromMap(Map<String, dynamic> map) {
+    return CategoriaHive(
+      id: (map['id'] ?? '').toString(),
+      nome: (map['nome'] ?? '').toString(),
+      iconeCodePoint: _readNullableInt(map['iconeCodePoint']),
+      ordem: _readInt(map['ordem']),
+      ativa: map['ativa'] == true,
+    );
+  }
+
+  static OfertaHive _offerFromMap(Map<String, dynamic> map) {
+    return OfertaHive(
+      id: (map['id'] ?? '').toString(),
+      tag: (map['tag'] ?? '').toString(),
+      titulo: (map['titulo'] ?? '').toString(),
+      subtitulo: (map['subtitulo'] ?? '').toString(),
+      corInicioHex: _readInt(map['corInicioHex']),
+      corFimHex: _readInt(map['corFimHex']),
+      larguraCard: _readDouble(map['larguraCard']),
+      inicioEm: _readDate(map['inicioEm']),
+      fimEm: _readDate(map['fimEm']),
+      categoriaId: map['categoriaId']?.toString(),
+    );
+  }
+
+  static int? _readNullableInt(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    return _readInt(value);
   }
 }
