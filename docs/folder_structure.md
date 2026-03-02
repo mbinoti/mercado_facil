@@ -35,10 +35,3 @@ lib/
 - Classes pur- Classes pur- Classes pucio- Classes pur- Classes pur- Classes pucio-`, `Repository`).
 - Preferencialmente imutaveis.
 
-## Fluxo de Dados
-1. UI chama metodo no `ViewModel` (ex: `userViewModel.login()`).
-2. `ViewModel` chama `Repository` (ex: `authRepository.login()`).
-3. `Repository`3. `Repository`3. `Repositoonverte em `DTO`.
-4. `Repository` converte `DTO` para `Model` e devolve.
-5. `ViewModel` recebe `Model`, atualiza estado e notifica UI (`notifyListeners`).
-6. UI se reconstroi com os novos dados.

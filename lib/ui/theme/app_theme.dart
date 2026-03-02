@@ -1,109 +1,65 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const kGreen = Color(0xFF22C55E);
-const kGreenDark = Color(0xFF16A34A);
-const kBackground = Color(0xFFF6F8F6);
-const kTextDark = Color(0xFF0F172A);
-const kTextMuted = Color(0xFF6B7280);
-const kBorder = Color(0xFFE2E8F0);
-const kShadow = Color(0x14000000);
-const kDanger = Color(0xFFF87171);
-const kBlack = Color(0xFF0B0B0B);
+class AppTheme {
+  static ThemeData lightTheme() {
+    const seedColor = Color(0xFF0CB05A);
 
-ThemeData buildAppTheme() {
-  final base = ThemeData(
-    useMaterial3: defaultTargetPlatform == TargetPlatform.android,
-  );
-  final baseTextTheme = GoogleFonts.manropeTextTheme(base.textTheme);
-  return base.copyWith(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: kGreen,
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seedColor,
       brightness: Brightness.light,
-    ),
-    scaffoldBackgroundColor: kBackground,
-    appBarTheme: AppBarTheme(
-      backgroundColor: kBackground,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: GoogleFonts.manrope(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: kTextDark,
-        letterSpacing: -0.2,
+      surface: const Color(0xFFF5F5F0),
+    );
+
+    final textTheme = GoogleFonts.nunitoSansTextTheme().copyWith(
+      headlineMedium: GoogleFonts.nunitoSans(
+        fontSize: 26,
+        fontWeight: FontWeight.w900,
+        color: const Color(0xFF141414),
       ),
-      iconTheme: const IconThemeData(color: kTextDark),
-    ),
-    textTheme: baseTextTheme.copyWith(
-      headlineSmall: baseTextTheme.headlineSmall?.copyWith(
-        fontSize: 28,
+      titleLarge: GoogleFonts.nunitoSans(
+        fontSize: 21,
         fontWeight: FontWeight.w800,
-        letterSpacing: -0.4,
-        color: kTextDark,
+        color: const Color(0xFF171717),
       ),
-      titleLarge: baseTextTheme.titleLarge?.copyWith(
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.2,
-        color: kTextDark,
-      ),
-      titleMedium: baseTextTheme.titleMedium?.copyWith(
+      titleMedium: GoogleFonts.nunitoSans(
         fontSize: 16,
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.1,
-        color: kTextDark,
+        fontWeight: FontWeight.w800,
+        color: const Color(0xFF171717),
       ),
-      bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+      bodyLarge: GoogleFonts.nunitoSans(
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF232323),
+      ),
+      bodyMedium: GoogleFonts.nunitoSans(
         fontSize: 14,
-        color: kTextMuted,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF5F655B),
       ),
-      bodySmall: baseTextTheme.bodySmall?.copyWith(
+      bodySmall: GoogleFonts.nunitoSans(
         fontSize: 12,
-        color: kTextMuted,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF7B8176),
       ),
-    ),
-  );
-}
-
-BoxDecoration cardDecoration({double radius = 18, Color color = Colors.white}) {
-  return BoxDecoration(
-    color: color,
-    borderRadius: BorderRadius.circular(radius),
-    boxShadow: const [
-      BoxShadow(
-        color: kShadow,
-        blurRadius: 16,
-        offset: Offset(0, 6),
+      labelLarge: GoogleFonts.nunitoSans(
+        fontSize: 13,
+        fontWeight: FontWeight.w800,
+        color: seedColor,
       ),
-    ],
-  );
-}
+    );
 
-InputDecoration appInputDecoration({
-  required String hint,
-  IconData? icon,
-  Widget? suffix,
-}) {
-  return InputDecoration(
-    hintText: hint,
-    hintStyle: const TextStyle(color: kTextMuted),
-    prefixIcon: icon != null ? Icon(icon, color: kTextMuted) : null,
-    suffixIcon: suffix,
-    filled: true,
-    fillColor: Colors.white,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: const BorderSide(color: kBorder),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: const BorderSide(color: kBorder),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: const BorderSide(color: kGreen),
-    ),
-  );
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: const Color(0xFFF3F3EE),
+      textTheme: textTheme,
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: Colors.transparent,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+    );
+  }
 }
