@@ -1,12 +1,19 @@
+import 'package:app_mercadofacil/model/home_product.dart';
+import 'package:app_mercadofacil/model/home_promotional_banner.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
+/// Repositorio estatico responsavel pelo catalogo fake persistido em Hive.
+///
+/// Ele concentra o ciclo de vida de armazenamento local: inicializacao do
+/// Hive, abertura da box, seed versionado, leitura, escrita, exclusao e
+/// notificacao de mudancas para a camada de estado.
 class HiveFakeProductsRepository {
   HiveFakeProductsRepository._();
 
   static const String boxName = 'fake_products_box';
   static const String _metaKey = '__meta__';
-  static const int _seedVersion = 2;
+  static const int _seedVersion = 3;
 
   static const List<Map<String, Object>> _seedProducts = [
     {
@@ -231,8 +238,64 @@ class HiveFakeProductsRepository {
     },
   ];
 
+  static const List<Map<String, Object>> _seedPromotionalBanners = [
+    {
+      'type': 'promo_banner',
+      'id': 'banner_cafe_manha',
+      'sortOrder': 0,
+      'badge': 'Oferta relampago',
+      'title': 'Cafe da manha em ritmo express',
+      'subtitle':
+          'Cappuccino cremoso com padaria fresca para fechar o pedido antes das 12h.',
+      'ctaLabel': 'Ver destaque',
+      'targetProductId': 'cappuccino_cremoso',
+      'backgroundColorHexes': [0xFF111A30, 0xFF2A4F72],
+      'textColorHex': 0xFFFFFFFF,
+    },
+    {
+      'type': 'promo_banner',
+      'id': 'banner_peixaria',
+      'sortOrder': 1,
+      'badge': 'Semana premium',
+      'title': 'Peixaria com entrega prioritaria',
+      'subtitle':
+          'Salmão em postas com curadoria especial para compras de jantar e fim de semana.',
+      'ctaLabel': 'Explorar oferta',
+      'targetProductId': 'salmao_em_postas',
+      'backgroundColorHexes': [0xFF0F6B78, 0xFF78C9D4],
+      'textColorHex': 0xFFFFFFFF,
+    },
+    {
+      'type': 'promo_banner',
+      'id': 'banner_despensa',
+      'sortOrder': 2,
+      'badge': 'Reposicao inteligente',
+      'title': 'Monte a despensa sem sair do fluxo',
+      'subtitle':
+          'Quinoa, lentilha e mix de castanhas reunidos em ofertas para abastecer a semana.',
+      'ctaLabel': 'Abrir produto',
+      'targetProductId': 'quinoa_branca',
+      'backgroundColorHexes': [0xFF5B3A29, 0xFFC98E5B],
+      'textColorHex': 0xFFFFFFFF,
+    },
+    {
+      'type': 'promo_banner',
+      'id': 'banner_higiene',
+      'sortOrder': 3,
+      'badge': 'Casa e cuidado',
+      'title': 'Higiene pessoal com compra rapida',
+      'subtitle':
+          'Shampoo hidratante e itens de rotina em destaque para complementar o carrinho.',
+      'ctaLabel': 'Conferir item',
+      'targetProductId': 'shampoo_hidratante',
+      'backgroundColorHexes': [0xFF3A6D84, 0xFF8DC8D7],
+      'textColorHex': 0xFFFFFFFF,
+    },
+  ];
+
   static bool _initialized = false;
 
+  /// Inicializa o Hive, abre a box principal e garante que o seed exista.
   static Future<void> initialize() async {
     if (_initialized) {
       return;
@@ -244,48 +307,81 @@ class HiveFakeProductsRepository {
     await seedIfNeeded();
   }
 
+  /// Exponibiliza um listenable da box para widgets e view models reagirem
+  /// a alteracoes persistidas sem polling manual.
   static ValueListenable<Box<Map>> listenable() {
     return _box.listenable();
   }
 
-  static List<Map<String, dynamic>> getCachedProducts() {
-    final products = _box.values
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .where((item) => item['type'] == 'product')
-        .toList(growable: false);
+  /// Le todos os produtos salvos, ordena pelo `sortOrder` e converte para
+  /// o modelo de dominio usado pela interface.
+  static List<HomeProduct> getProducts() {
+    final products =
+        _box.values
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .where((item) => item['type'] == 'product')
+            .toList(growable: false)
+          ..sort(
+            (left, right) =>
+                _sortOrderFor(left).compareTo(_sortOrderFor(right)),
+          );
 
-    products.sort(
-      (left, right) =>
-          (left['sortOrder'] as int).compareTo(right['sortOrder'] as int),
-    );
-
-    return products;
+    return products.map(HomeProduct.fromRepositoryMap).toList(growable: false);
   }
 
-  static Map<String, dynamic>? getCachedProductById(String id) {
+  /// Le os banners promocionais salvos e entrega uma lista ordenada para a home.
+  static List<HomePromotionalBanner> getPromotionalBanners() {
+    final banners =
+        _box.values
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .where((item) => item['type'] == 'promo_banner')
+            .toList(growable: false)
+          ..sort(
+            (left, right) =>
+                _sortOrderFor(left).compareTo(_sortOrderFor(right)),
+          );
+
+    return banners
+        .map(HomePromotionalBanner.fromRepositoryMap)
+        .toList(growable: false);
+  }
+
+  /// Busca um produto especifico pelo id persistido na box.
+  static HomeProduct? getProductById(String id) {
     final product = _box.get(id);
     if (product == null) {
       return null;
     }
 
-    return Map<String, dynamic>.from(product);
+    return HomeProduct.fromRepositoryMap(Map<String, dynamic>.from(product));
   }
 
+  /// Verifica se o seed atual ja foi aplicado.
+  ///
+  /// Se a versao salva divergir de [_seedVersion] ou se nao houver produtos
+  /// persistidos, a box e reconstruida com [reseed].
   static Future<void> seedIfNeeded() async {
     final meta = _box.get(_metaKey);
     final savedVersion = meta == null
         ? null
         : Map<String, dynamic>.from(meta)['seedVersion'] as int?;
-    final hasProducts = _box.keys.any((key) => key != _metaKey);
+    final hasCatalogEntries = _box.keys.any((key) => key != _metaKey);
 
-    if (savedVersion == _seedVersion && hasProducts) {
+    if (savedVersion == _seedVersion && hasCatalogEntries) {
+      return;
+    }
+
+    if (hasCatalogEntries && (savedVersion == null || savedVersion < 3)) {
+      await _migrateSeedData();
       return;
     }
 
     await reseed();
   }
 
+  /// Limpa a box e recria todos os produtos fake padrao.
   static Future<void> reseed() async {
     await _box.clear();
 
@@ -293,13 +389,17 @@ class HiveFakeProductsRepository {
       await _box.put(product['id']! as String, product);
     }
 
-    await _box.put(_metaKey, {
-      'type': 'meta',
-      'seedVersion': _seedVersion,
-      'updatedAt': DateTime.now().toIso8601String(),
-    });
+    for (final banner in _seedPromotionalBanners) {
+      await _box.put(banner['id']! as String, banner);
+    }
+
+    await _writeMeta();
   }
 
+  /// Salva ou substitui um produto arbitrario na box.
+  ///
+  /// O mapa precisa conter `id`. O campo `type` e normalizado para
+  /// `product` antes da gravacao.
   static Future<void> saveProduct(Map<String, dynamic> product) async {
     final id = product['id'] as String?;
     if (id == null || id.isEmpty) {
@@ -310,8 +410,32 @@ class HiveFakeProductsRepository {
     await _box.put(id, normalized);
   }
 
+  /// Remove um produto persistido pelo id.
   static Future<void> deleteProduct(String id) async {
     await _box.delete(id);
+  }
+
+  static Future<void> _migrateSeedData() async {
+    for (final banner in _seedPromotionalBanners) {
+      final id = banner['id']! as String;
+      if (!_box.containsKey(id)) {
+        await _box.put(id, banner);
+      }
+    }
+
+    await _writeMeta();
+  }
+
+  static Future<void> _writeMeta() async {
+    await _box.put(_metaKey, {
+      'type': 'meta',
+      'seedVersion': _seedVersion,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  static int _sortOrderFor(Map<String, dynamic> item) {
+    return item['sortOrder'] as int? ?? 0;
   }
 
   static Box<Map> get _box {

@@ -2,6 +2,10 @@ import Flutter
 import UIKit
 import XCTest
 
+/// Suite base para testes nativos do target iOS.
+///
+/// Hoje a classe contem apenas o template gerado pelo projeto, mas ela e o
+/// ponto natural para validar integracoes especificas da plataforma.
 class RunnerTests: XCTestCase {
 
   func testExample() {

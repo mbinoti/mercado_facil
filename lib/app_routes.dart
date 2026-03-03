@@ -1,3 +1,8 @@
+/// Catalogo de rotas nomeadas previstas para o aplicativo.
+///
+/// No estado atual do projeto, essas constantes ainda nao estao ligadas ao
+/// `MaterialApp`, mas servem como ponto unico para padronizar caminhos de
+/// navegacao e evitar strings espalhadas pela base.
 class AppRoutes {
   static const index = '/';
   static const onboarding = '/onboarding';
