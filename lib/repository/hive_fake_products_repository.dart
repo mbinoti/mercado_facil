@@ -13,7 +13,7 @@ class HiveFakeProductsRepository {
 
   static const String boxName = 'fake_products_box';
   static const String _metaKey = '__meta__';
-  static const int _seedVersion = 4;
+  static const int _seedVersion = 5;
 
   static const List<Map<String, Object>> _seedProducts = [
     {
@@ -267,8 +267,12 @@ class HiveFakeProductsRepository {
       'title': 'Cafe da manha em ritmo express',
       'subtitle':
           'Cappuccino cremoso com padaria fresca para fechar o pedido antes das 12h.',
-      'ctaLabel': 'Ver destaque',
-      'targetProductId': 'cappuccino_cremoso',
+      'ctaLabel': 'Ver selecao',
+      'targetProductIds': [
+        'cappuccino_cremoso',
+        'brioche_artesanal',
+        'bebida_de_aveia_barista',
+      ],
       'backgroundColorHexes': [0xFF111A30, 0xFF2A4F72],
       'textColorHex': 0xFFFFFFFF,
     },
@@ -276,12 +280,16 @@ class HiveFakeProductsRepository {
       'type': 'promo_banner',
       'id': 'banner_peixaria',
       'sortOrder': 1,
-      'badge': 'Semana premium',
-      'title': 'Peixaria com entrega prioritaria',
+      'badge': 'Jantar premium',
+      'title': 'Proteinas frescas com entrega prioritaria',
       'subtitle':
-          'Salmão em postas com curadoria especial para compras de jantar e fim de semana.',
-      'ctaLabel': 'Explorar oferta',
-      'targetProductId': 'salmao_em_postas',
+          'Salmao, ovos e frango reunidos para compras de jantar e fim de semana.',
+      'ctaLabel': 'Explorar selecao',
+      'targetProductIds': [
+        'salmao_em_postas',
+        'ovos_jumbo',
+        'coxa_sobrecoxa',
+      ],
       'backgroundColorHexes': [0xFF0F6B78, 0xFF78C9D4],
       'textColorHex': 0xFFFFFFFF,
     },
@@ -293,8 +301,12 @@ class HiveFakeProductsRepository {
       'title': 'Monte a despensa sem sair do fluxo',
       'subtitle':
           'Quinoa, lentilha e mix de castanhas reunidos em ofertas para abastecer a semana.',
-      'ctaLabel': 'Abrir produto',
-      'targetProductId': 'quinoa_branca',
+      'ctaLabel': 'Ver ofertas',
+      'targetProductIds': [
+        'quinoa_branca',
+        'lentilha_selecionada',
+        'mix_de_castanhas',
+      ],
       'backgroundColorHexes': [0xFF5B3A29, 0xFFC98E5B],
       'textColorHex': 0xFFFFFFFF,
     },
@@ -303,11 +315,15 @@ class HiveFakeProductsRepository {
       'id': 'banner_higiene',
       'sortOrder': 3,
       'badge': 'Casa e cuidado',
-      'title': 'Higiene pessoal com compra rapida',
+      'title': 'Casa e cuidado em compra rapida',
       'subtitle':
-          'Shampoo hidratante e itens de rotina em destaque para complementar o carrinho.',
-      'ctaLabel': 'Conferir item',
-      'targetProductId': 'shampoo_hidratante',
+          'Shampoo, multiuso e guardanapos em destaque para complementar o carrinho.',
+      'ctaLabel': 'Abrir selecao',
+      'targetProductIds': [
+        'shampoo_hidratante',
+        'limpador_multiuso_citrus',
+        'guardanapo_folha_dupla',
+      ],
       'backgroundColorHexes': [0xFF3A6D84, 0xFF8DC8D7],
       'textColorHex': 0xFFFFFFFF,
     },

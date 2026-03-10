@@ -12,12 +12,14 @@ class CartButton extends StatelessWidget {
     this.backgroundColor = Colors.white,
     this.foregroundColor = const Color(0xFF111A30),
     this.size = 54,
+    this.showBadge = true,
   });
 
   final VoidCallback onPressed;
   final Color backgroundColor;
   final Color foregroundColor;
   final double size;
+  final bool showBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +79,7 @@ class CartButton extends StatelessWidget {
                   ),
                 ),
               ),
-            if (totalItems > 0)
+            if (showBadge && totalItems > 0)
               Positioned(
                 top: -6,
                 right: -6,

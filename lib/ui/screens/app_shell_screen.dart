@@ -3,6 +3,7 @@ import 'package:app_mercadofacil/ui/screens/categories_screen.dart';
 import 'package:app_mercadofacil/ui/screens/cart_screen.dart';
 import 'package:app_mercadofacil/ui/screens/home_screen.dart';
 import 'package:app_mercadofacil/ui/screens/orders_screen.dart';
+import 'package:app_mercadofacil/ui/screens/profile_screen.dart';
 import 'package:app_mercadofacil/viewmodel/app_shell_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/cart_viewmodel.dart';
 import 'package:flutter/cupertino.dart';
@@ -222,190 +223,12 @@ class _NavigationIcon extends StatelessWidget {
   }
 }
 
-class _ShellPlaceholderScreen extends StatelessWidget {
-  const _ShellPlaceholderScreen({required this.config});
-
-  final _ShellPlaceholderConfig config;
-
-  @override
-  Widget build(BuildContext context) {
-    final isCupertino = isCupertinoContext(context);
-    final body = _ShellPlaceholderBody(config: config);
-
-    if (isCupertino) {
-      return CupertinoPageScaffold(
-        backgroundColor: config.backgroundColor,
-        navigationBar: CupertinoNavigationBar(
-          backgroundColor: config.backgroundColor.withValues(alpha: 0.94),
-          border: null,
-          middle: Text(config.title),
-        ),
-        child: SafeArea(top: false, child: body),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: config.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: config.backgroundColor,
-        title: Text(config.title),
-      ),
-      body: body,
-    );
-  }
-}
-
-class _ShellPlaceholderBody extends StatelessWidget {
-  const _ShellPlaceholderBody({required this.config});
-
-  final _ShellPlaceholderConfig config;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final isCupertino = isCupertinoContext(context);
-    final icon = platformIcon(
-      context,
-      material: config.materialIcon,
-      cupertino: config.cupertinoIcon,
-    );
-    final actionLabel = config.actionLabel;
-    final action = isCupertino
-        ? CupertinoButton.filled(
-            borderRadius: BorderRadius.circular(18),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            onPressed: () => context.read<AppShellViewModel>().goTo(
-              config.actionDestination,
-            ),
-            child: Text(
-              actionLabel,
-              style: textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          )
-        : FilledButton(
-            onPressed: () => context.read<AppShellViewModel>().goTo(
-              config.actionDestination,
-            ),
-            style: FilledButton.styleFrom(
-              backgroundColor: config.accentColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              textStyle: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            child: Text(actionLabel),
-          );
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.86),
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x12000000),
-                  blurRadius: 22,
-                  offset: Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: config.accentColor.withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Icon(icon, size: 40, color: config.accentColor),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    config.headline,
-                    textAlign: TextAlign.center,
-                    style: textTheme.headlineMedium?.copyWith(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF111A30),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    config.description,
-                    textAlign: TextAlign.center,
-                    style: textTheme.bodyMedium?.copyWith(
-                      height: 1.5,
-                      color: const Color(0xFF66707F),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  action,
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ShellPlaceholderConfig {
-  const _ShellPlaceholderConfig({
-    required this.title,
-    required this.headline,
-    required this.description,
-    required this.actionLabel,
-    required this.actionDestination,
-    required this.backgroundColor,
-    required this.accentColor,
-    required this.materialIcon,
-    required this.cupertinoIcon,
-  });
-
-  final String title;
-  final String headline;
-  final String description;
-  final String actionLabel;
-  final AppShellTab actionDestination;
-  final Color backgroundColor;
-  final Color accentColor;
-  final IconData materialIcon;
-  final IconData cupertinoIcon;
-}
-
-const _profileTabConfig = _ShellPlaceholderConfig(
-  title: 'Perfil',
-  headline: 'Perfil pronto para evoluir.',
-  description:
-      'A aba pode concentrar endereco, pagamentos e preferencias do cliente sem poluir a home de produtos.',
-  actionLabel: 'Voltar para inicio',
-  actionDestination: AppShellTab.home,
-  backgroundColor: Color(0xFFEEF4F7),
-  accentColor: Color(0xFF3A6D84),
-  materialIcon: Icons.person_outline_rounded,
-  cupertinoIcon: CupertinoIcons.person,
-);
-
 const List<Widget> _shellTabScreens = [
   HomeScreen(),
   CategoriesScreen(),
   CartScreen(),
   OrdersScreen(),
-  _ShellPlaceholderScreen(config: _profileTabConfig),
+  ProfileScreen(),
 ];
 
 extension on AppShellTab {

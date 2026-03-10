@@ -1,10 +1,9 @@
 import 'package:app_mercadofacil/model/home_product.dart';
 import 'package:app_mercadofacil/model/home_promotional_banner.dart';
 import 'package:app_mercadofacil/ui/platform/platform_ui.dart';
+import 'package:app_mercadofacil/ui/screens/promotional_collection_screen.dart';
 import 'package:app_mercadofacil/ui/screens/product_details_screen.dart';
-import 'package:app_mercadofacil/ui/widgets/cart_button.dart';
 import 'package:app_mercadofacil/ui/widgets/product_visual.dart';
-import 'package:app_mercadofacil/viewmodel/app_shell_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/cart_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/home_products_viewmodel.dart';
 import 'package:flutter/cupertino.dart';
@@ -130,24 +129,25 @@ class _HomeHeader extends StatelessWidget {
                   color: const Color(0xFF111A30),
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                'Catalogo sincronizado com o Hive, com promocoes ativas e atalhos rapidos para os destaques do dia.',
-                style: textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF6F7784),
-                ),
-              ),
+              // const SizedBox(height: 4),
+              // Text(
+              //   'Catalogo sincronizado com o Hive, com promocoes ativas e atalhos rapidos para os destaques do dia.',
+              //   style: textTheme.bodyMedium?.copyWith(
+              //     fontWeight: FontWeight.w600,
+              //     color: const Color(0xFF6F7784),
+              //   ),
+              // ),
             ],
           ),
         ),
-        const SizedBox(width: 16),
-        CartButton(
-          onPressed: () =>
-              context.read<AppShellViewModel>().goTo(AppShellTab.cart),
-          backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF111A30),
-        ),
+        // const SizedBox(width: 16),
+        // CartButton(
+        //   onPressed: () =>
+        //       context.read<AppShellViewModel>().goTo(AppShellTab.cart),
+        //   backgroundColor: Colors.white,
+        //   foregroundColor: const Color(0xFF111A30),
+        //   showBadge: false,
+        // ),
       ],
     );
   }
@@ -514,11 +514,14 @@ class _PromotionalBannersSectionState
                 const SizedBox(width: _promotionalBannerSpacing),
             itemBuilder: (context, index) {
               final banner = widget.banners[index];
+              final targetProducts = banner.targetProductIds
+                  .map((productId) => widget.productsById[productId])
+                  .whereType<HomeProduct>()
+                  .toList(growable: false);
+
               return _PromotionalBannerCard(
                 banner: banner,
-                targetProduct: banner.targetProductId == null
-                    ? null
-                    : widget.productsById[banner.targetProductId],
+                targetProducts: targetProducts,
               );
             },
           ),
@@ -582,15 +585,20 @@ class _PromotionalBannerIndicators extends StatelessWidget {
 class _PromotionalBannerCard extends StatelessWidget {
   const _PromotionalBannerCard({
     required this.banner,
-    required this.targetProduct,
+    required this.targetProducts,
   });
 
   final HomePromotionalBanner banner;
-  final HomeProduct? targetProduct;
+  final List<HomeProduct> targetProducts;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final priceOrCountLabel = switch (targetProducts.length) {
+      0 => null,
+      1 => targetProducts.single.price,
+      _ => '${targetProducts.length} itens',
+    };
     final content = SizedBox(
       width: _promotionalBannerCardWidth,
       child: Stack(
@@ -698,11 +706,11 @@ class _PromotionalBannerCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (targetProduct != null) ...[
+                      if (priceOrCountLabel != null) ...[
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            targetProduct!.price,
+                            priceOrCountLabel,
                             textAlign: TextAlign.right,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -765,12 +773,17 @@ class _PromotionalBannerCard extends StatelessWidget {
   }
 
   void _openPromotionalBanner(BuildContext context) {
-    if (targetProduct != null) {
-      _openProductDetails(context, targetProduct!);
+    if (targetProducts.isEmpty) {
+      showPlatformFeedback(context, 'Promocao atualizada no catalogo do dia.');
       return;
     }
 
-    showPlatformFeedback(context, 'Promocao atualizada no catalogo do dia.');
+    if (targetProducts.length == 1) {
+      _openProductDetails(context, targetProducts.single);
+      return;
+    }
+
+    _openPromotionalCollection(context, banner, targetProducts);
   }
 }
 
@@ -1126,5 +1139,18 @@ void _addProductToCart(BuildContext context, HomeProduct product) {
 void _openProductDetails(BuildContext context, HomeProduct product) {
   Navigator.of(context).push(
     platformPageRoute(builder: (_) => ProductDetailsScreen(product: product)),
+  );
+}
+
+void _openPromotionalCollection(
+  BuildContext context,
+  HomePromotionalBanner banner,
+  List<HomeProduct> products,
+) {
+  Navigator.of(context).push(
+    platformPageRoute(
+      builder: (_) =>
+          PromotionalCollectionScreen(banner: banner, products: products),
+    ),
   );
 }

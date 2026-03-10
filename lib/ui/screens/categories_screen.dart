@@ -197,6 +197,7 @@ class _CategoriesHeader extends StatelessWidget {
               context.read<AppShellViewModel>().goTo(AppShellTab.cart),
           backgroundColor: Colors.white,
           foregroundColor: const Color(0xFF111A30),
+          showBadge: false,
         ),
       ],
     );

@@ -1,7 +1,9 @@
 import 'package:app_mercadofacil/repository/hive_fake_products_repository.dart';
+import 'package:app_mercadofacil/repository/hive_onboarding_repository.dart';
 import 'package:app_mercadofacil/ui/platform/platform_ui.dart';
-import 'package:app_mercadofacil/ui/screens/app_shell_screen.dart';
+import 'package:app_mercadofacil/ui/screens/app_entry_screen.dart';
 import 'package:app_mercadofacil/ui/theme/app_theme.dart';
+import 'package:app_mercadofacil/viewmodel/app_launch_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/app_shell_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/cart_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/orders_viewmodel.dart';
@@ -24,6 +26,7 @@ const List<Locale> _appSupportedLocales = [
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await HiveFakeProductsRepository.initialize();
+  await HiveOnboardingRepository.initialize();
   runApp(const MercadoFacilApp());
 }
 
@@ -39,6 +42,14 @@ class MercadoFacilApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<OnboardingRepository>(
+          create: (_) => HiveOnboardingRepository(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AppLaunchViewModel(
+            onboardingRepository: context.read<OnboardingRepository>(),
+          )..load(),
+        ),
         ChangeNotifierProvider(create: (_) => AppShellViewModel()),
         ChangeNotifierProvider(create: (_) => CartViewModel()),
         ChangeNotifierProvider(create: (_) => OrdersViewModel()),
@@ -61,7 +72,7 @@ class _MercadoFacilMaterialApp extends StatelessWidget {
       theme: AppTheme.lightTheme(platform: TargetPlatform.android),
       localizationsDelegates: _appLocalizationsDelegates,
       supportedLocales: _appSupportedLocales,
-      home: const AppShellScreen(),
+      home: const AppEntryScreen(),
     );
   }
 }
@@ -83,7 +94,7 @@ class _MercadoFacilCupertinoApp extends StatelessWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
-      home: const AppShellScreen(),
+      home: const AppEntryScreen(),
     );
   }
 }

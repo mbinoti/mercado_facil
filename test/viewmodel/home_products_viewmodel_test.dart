@@ -74,5 +74,18 @@ void main() {
       expect(viewModel.searchQuery, isEmpty);
       expect(viewModel.products.length, viewModel.catalogProducts.length);
     });
+
+    test('expoe banners promocionais com mais de um item', () {
+      final viewModel = HomeProductsViewModel();
+      addTearDown(viewModel.dispose);
+
+      expect(viewModel.promotionalBanners, isNotEmpty);
+      expect(
+        viewModel.promotionalBanners.any(
+          (banner) => banner.targetProductIds.length > 1,
+        ),
+        isTrue,
+      );
+    });
   });
 }
