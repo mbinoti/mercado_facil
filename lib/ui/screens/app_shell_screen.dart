@@ -1,4 +1,5 @@
 import 'package:app_mercadofacil/ui/platform/platform_ui.dart';
+import 'package:app_mercadofacil/ui/screens/categories_screen.dart';
 import 'package:app_mercadofacil/ui/screens/cart_screen.dart';
 import 'package:app_mercadofacil/ui/screens/home_screen.dart';
 import 'package:app_mercadofacil/ui/screens/orders_screen.dart';
@@ -386,19 +387,6 @@ class _ShellPlaceholderConfig {
   final IconData cupertinoIcon;
 }
 
-const _categoriesTabConfig = _ShellPlaceholderConfig(
-  title: 'Categorias',
-  headline: 'Categorias entram aqui.',
-  description:
-      'Use esta aba para navegar por secoes como frutas, limpeza e mercearia sem misturar esse fluxo com a vitrine principal.',
-  actionLabel: 'Ir para inicio',
-  actionDestination: AppShellTab.home,
-  backgroundColor: Color(0xFFF6F1EB),
-  accentColor: Color(0xFF8F5D3B),
-  materialIcon: Icons.grid_view_rounded,
-  cupertinoIcon: CupertinoIcons.square_grid_2x2,
-);
-
 const _profileTabConfig = _ShellPlaceholderConfig(
   title: 'Perfil',
   headline: 'Perfil pronto para evoluir.',
@@ -414,7 +402,7 @@ const _profileTabConfig = _ShellPlaceholderConfig(
 
 const List<Widget> _shellTabScreens = [
   HomeScreen(),
-  _ShellPlaceholderScreen(config: _categoriesTabConfig),
+  CategoriesScreen(),
   CartScreen(),
   OrdersScreen(),
   _ShellPlaceholderScreen(config: _profileTabConfig),

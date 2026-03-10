@@ -2,7 +2,9 @@ import 'package:app_mercadofacil/model/home_product.dart';
 import 'package:app_mercadofacil/model/home_promotional_banner.dart';
 import 'package:app_mercadofacil/ui/platform/platform_ui.dart';
 import 'package:app_mercadofacil/ui/screens/product_details_screen.dart';
+import 'package:app_mercadofacil/ui/widgets/cart_button.dart';
 import 'package:app_mercadofacil/ui/widgets/product_visual.dart';
+import 'package:app_mercadofacil/viewmodel/app_shell_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/cart_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/home_products_viewmodel.dart';
 import 'package:flutter/cupertino.dart';
@@ -50,26 +52,43 @@ class _HomeScreenView extends StatelessWidget {
         child: Consumer<HomeProductsViewModel>(
           builder: (context, viewModel, child) {
             final products = viewModel.products;
-            final promotionalBanners = viewModel.promotionalBanners;
+            final promotionalBanners = viewModel.hasActiveFilters
+                ? const <HomePromotionalBanner>[]
+                : viewModel.promotionalBanners;
             final productsById = {
-              for (final product in products) product.id: product,
+              for (final product in viewModel.catalogProducts)
+                product.id: product,
             };
 
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
-                  child: const _HomeHeader(),
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(12, 12, 12, 6),
+                    child: _HomeHeader(),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
+                    child: _CatalogDiscoverySection(viewModel: viewModel),
+                  ),
                 ),
                 if (promotionalBanners.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
-                    child: _PromotionalBannersSection(
-                      banners: promotionalBanners,
-                      productsById: productsById,
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                      child: _PromotionalBannersSection(
+                        banners: promotionalBanners,
+                        productsById: productsById,
+                      ),
                     ),
                   ),
-                Expanded(child: _ProductsGrid(products: products)),
+                _ProductsSliver(
+                  products: products,
+                  hasActiveFilters: viewModel.hasActiveFilters,
+                ),
               ],
             );
           },
@@ -96,26 +115,298 @@ class _HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Produtos',
-          style: textTheme.headlineMedium?.copyWith(
-            fontSize: 30,
-            fontWeight: FontWeight.w900,
-            color: const Color(0xFF111A30),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Produtos',
+                style: textTheme.headlineMedium?.copyWith(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF111A30),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Catalogo sincronizado com o Hive, com promocoes ativas e atalhos rapidos para os destaques do dia.',
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF6F7784),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          'Catalogo sincronizado com o Hive, com promocoes ativas e atalhos rapidos para os destaques do dia.',
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF6F7784),
-          ),
+        const SizedBox(width: 16),
+        CartButton(
+          onPressed: () =>
+              context.read<AppShellViewModel>().goTo(AppShellTab.cart),
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF111A30),
         ),
       ],
+    );
+  }
+}
+
+class _CatalogDiscoverySection extends StatefulWidget {
+  const _CatalogDiscoverySection({required this.viewModel});
+
+  final HomeProductsViewModel viewModel;
+
+  @override
+  State<_CatalogDiscoverySection> createState() =>
+      _CatalogDiscoverySectionState();
+}
+
+class _CatalogDiscoverySectionState extends State<_CatalogDiscoverySection> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(
+      text: widget.viewModel.searchQuery,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _CatalogDiscoverySection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_searchController.text != widget.viewModel.searchQuery) {
+      _searchController.value = _searchController.value.copyWith(
+        text: widget.viewModel.searchQuery,
+        selection: TextSelection.collapsed(
+          offset: widget.viewModel.searchQuery.length,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = widget.viewModel;
+    final textTheme = Theme.of(context).textTheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _HomeSearchField(
+              controller: _searchController,
+              onChanged: viewModel.updateSearchQuery,
+              onClear: () {
+                _searchController.clear();
+                viewModel.updateSearchQuery('');
+              },
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    viewModel.resultsSummary,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF5A6474),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (viewModel.hasActiveFilters)
+                  _InlineClearButton(
+                    onPressed: () {
+                      _searchController.clear();
+                      viewModel.clearFilters();
+                    },
+                  ),
+              ],
+            ),
+            if (viewModel.availableCategories.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 40,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: viewModel.availableCategories.length + 1,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return _CategoryChip(
+                        label: 'Todos',
+                        selected: viewModel.selectedCategory == null,
+                        onPressed: () => viewModel.selectCategory(null),
+                      );
+                    }
+
+                    final category = viewModel.availableCategories[index - 1];
+                    return _CategoryChip(
+                      label: category.label,
+                      selected: viewModel.selectedCategory == category,
+                      onPressed: () => viewModel.selectCategory(category),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeSearchField extends StatelessWidget {
+  const _HomeSearchField({
+    required this.controller,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isCupertinoContext(context)) {
+      return CupertinoSearchTextField(
+        controller: controller,
+        placeholder: 'Buscar por nome, unidade ou categoria',
+        onChanged: onChanged,
+        onSuffixTap: onClear,
+      );
+    }
+
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: 'Buscar por nome, unidade ou categoria',
+        prefixIcon: const Icon(Icons.search_rounded),
+        suffixIcon: controller.text.isEmpty
+            ? null
+            : IconButton(
+                tooltip: 'Limpar busca',
+                onPressed: onClear,
+                icon: const Icon(Icons.close_rounded),
+              ),
+        filled: true,
+        fillColor: const Color(0xFFF7F8F5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
+      ),
+    );
+  }
+}
+
+class _InlineClearButton extends StatelessWidget {
+  const _InlineClearButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isCupertinoContext(context)) {
+      return CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        onPressed: onPressed,
+        child: Text(
+          'Limpar',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: const Color(0xFF2F8B37),
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      );
+    }
+
+    return TextButton(onPressed: onPressed, child: const Text('Limpar'));
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = selected ? Colors.white : const Color(0xFF4B5563);
+    final backgroundColor = selected
+        ? const Color(0xFF2F8B37)
+        : const Color(0xFFF1F3EE);
+
+    final content = AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+
+    if (isCupertinoContext(context)) {
+      return CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        onPressed: onPressed,
+        child: content,
+      );
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onPressed,
+        child: content,
+      ),
     );
   }
 }
@@ -483,68 +774,104 @@ class _PromotionalBannerCard extends StatelessWidget {
   }
 }
 
-/// Grid responsivo usado para exibir a lista de produtos da home.
+/// Sliver responsivo usado para exibir a lista de produtos da home.
 ///
 /// A quantidade de colunas varia conforme a largura disponivel. Quando a
 /// lista esta vazia, o widget delega para [_EmptyProductsState].
-class _ProductsGrid extends StatelessWidget {
-  const _ProductsGrid({required this.products});
+class _ProductsSliver extends StatelessWidget {
+  const _ProductsSliver({
+    required this.products,
+    required this.hasActiveFilters,
+  });
 
   final List<HomeProduct> products;
+  final bool hasActiveFilters;
 
   @override
   Widget build(BuildContext context) {
     if (products.isEmpty) {
-      return const _EmptyProductsState();
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: _EmptyProductsState(hasActiveFilters: hasActiveFilters),
+      );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = switch (constraints.maxWidth) {
-          >= 900 => 4,
-          >= 580 => 3,
-          _ => 2,
-        };
-        const horizontalPadding = 24.0;
-        const crossAxisSpacing = 14.0;
-        final itemWidth =
-            (constraints.maxWidth -
-                horizontalPadding -
-                (crossAxisCount - 1) * crossAxisSpacing) /
-            crossAxisCount;
-        final itemExtent = itemWidth + 136;
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 24),
+      sliver: SliverLayoutBuilder(
+        builder: (context, constraints) {
+          final crossAxisCount = switch (constraints.crossAxisExtent) {
+            >= 900 => 4,
+            >= 580 => 3,
+            _ => 2,
+          };
+          const crossAxisSpacing = 14.0;
+          final itemWidth =
+              (constraints.crossAxisExtent -
+                  (crossAxisCount - 1) * crossAxisSpacing) /
+              crossAxisCount;
+          final itemExtent = itemWidth + 136;
 
-        return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(12, 6, 12, 24),
-          physics: const BouncingScrollPhysics(),
-          itemCount: products.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: crossAxisSpacing,
-            mainAxisSpacing: 14,
-            mainAxisExtent: itemExtent,
-          ),
-          itemBuilder: (context, index) {
-            return _ProductCard(product: products[index]);
-          },
-        );
-      },
+          return SliverGrid(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return _ProductCard(product: products[index]);
+            }, childCount: products.length),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: crossAxisSpacing,
+              mainAxisSpacing: 14,
+              mainAxisExtent: itemExtent,
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
 /// Estado vazio mostrado quando nao ha produtos para a fonte selecionada.
 class _EmptyProductsState extends StatelessWidget {
-  const _EmptyProductsState();
+  const _EmptyProductsState({required this.hasActiveFilters});
+
+  final bool hasActiveFilters;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final icon = platformIcon(
-      context,
-      material: Icons.inventory_2_outlined,
-      cupertino: CupertinoIcons.cube_box,
-    );
+    final icon = hasActiveFilters
+        ? platformIcon(
+            context,
+            material: Icons.search_off_rounded,
+            cupertino: CupertinoIcons.search,
+          )
+        : platformIcon(
+            context,
+            material: Icons.inventory_2_outlined,
+            cupertino: CupertinoIcons.cube_box,
+          );
+    final action = hasActiveFilters
+        ? (isCupertinoContext(context)
+              ? CupertinoButton.filled(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  onPressed: () =>
+                      context.read<HomeProductsViewModel>().clearFilters(),
+                  child: Text(
+                    'Limpar filtros',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                )
+              : FilledButton(
+                  onPressed: () =>
+                      context.read<HomeProductsViewModel>().clearFilters(),
+                  child: const Text('Limpar filtros'),
+                ))
+        : null;
 
     return Center(
       child: Padding(
@@ -555,19 +882,24 @@ class _EmptyProductsState extends StatelessWidget {
             Icon(icon, size: 44, color: const Color(0xFF7C838D)),
             const SizedBox(height: 12),
             Text(
-              'Nenhum produto encontrado.',
+              hasActiveFilters
+                  ? 'Nenhum produto combina com sua busca.'
+                  : 'Nenhum produto encontrado.',
               style: textTheme.titleMedium?.copyWith(
                 color: const Color(0xFF111A30),
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              'Confira se o seed do Hive foi executado e se ha produtos persistidos na base local.',
+              hasActiveFilters
+                  ? 'Tente buscar por outro nome, trocar a categoria ou limpar os filtros para voltar ao catalogo completo.'
+                  : 'Confira se o seed do Hive foi executado e se ha produtos persistidos na base local.',
               textAlign: TextAlign.center,
               style: textTheme.bodyMedium?.copyWith(
                 color: const Color(0xFF6F7784),
               ),
             ),
+            if (action != null) ...[const SizedBox(height: 16), action],
           ],
         ),
       ),
@@ -616,7 +948,10 @@ class _ProductCard extends StatelessWidget {
                       tag: 'product-${product.id}',
                       child: SizedBox.square(
                         dimension: imageSide,
-                        child: ProductVisual(product: product),
+                        child: ProductVisual(
+                          product: product,
+                          preferAssetImage: true,
+                        ),
                       ),
                     ),
                     Positioned(

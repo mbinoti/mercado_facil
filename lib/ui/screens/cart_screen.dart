@@ -24,6 +24,14 @@ class CartScreen extends StatelessWidget {
           return const _EmptyCartState();
         }
 
+        final notice = cart.noticeMessage;
+        final noticeBanner = notice == null
+            ? null
+            : _CartNoticeBanner(
+                message: notice,
+                onDismiss: context.read<CartViewModel>().clearNoticeMessage,
+              );
+
         return LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth >= 980;
@@ -31,12 +39,25 @@ class CartScreen extends StatelessWidget {
             if (isWide) {
               return Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
                   children: [
-                    Expanded(child: _CartItemsList(items: cart.items)),
-                    const SizedBox(width: 20),
-                    SizedBox(width: 320, child: _CartSummaryCard(cart: cart)),
+                    if (noticeBanner != null) ...[
+                      noticeBanner,
+                      const SizedBox(height: 16),
+                    ],
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: _CartItemsList(items: cart.items)),
+                          const SizedBox(width: 20),
+                          SizedBox(
+                            width: 320,
+                            child: _CartSummaryCard(cart: cart),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -46,9 +67,19 @@ class CartScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Column(
                 children: [
-                  Expanded(child: _CartItemsList(items: cart.items)),
-                  const SizedBox(height: 16),
-                  _CartSummaryCard(cart: cart),
+                  if (noticeBanner != null) ...[
+                    noticeBanner,
+                    const SizedBox(height: 16),
+                  ],
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(child: _CartItemsList(items: cart.items)),
+                        const SizedBox(height: 16),
+                        _CartSummaryCard(cart: cart),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             );
@@ -197,6 +228,78 @@ class _EmptyCartState extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               backButton,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CartNoticeBanner extends StatelessWidget {
+  const _CartNoticeBanner({required this.message, required this.onDismiss});
+
+  final String message;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final isCupertino = isCupertinoContext(context);
+    final icon = platformIcon(
+      context,
+      material: Icons.check_circle_rounded,
+      cupertino: CupertinoIcons.check_mark_circled_solid,
+    );
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 180),
+      child: DecoratedBox(
+        key: ValueKey(message),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE9F6EA),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFB8DDBB)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+          child: Row(
+            children: [
+              Icon(icon, color: const Color(0xFF2F8B37), size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF1E5D25),
+                    fontWeight: FontWeight.w800,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (isCupertino)
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  onPressed: onDismiss,
+                  child: Text(
+                    'Fechar',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF2F8B37),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                )
+              else
+                IconButton(
+                  tooltip: 'Fechar aviso',
+                  onPressed: onDismiss,
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: Color(0xFF2F8B37),
+                  ),
+                ),
             ],
           ),
         ),

@@ -8,16 +8,16 @@ import 'package:flutter/foundation.dart';
 /// notifica a interface sempre que quantidades forem alteradas.
 class CartViewModel extends ChangeNotifier {
   final Map<String, CartItem> _itemsByProductId = <String, CartItem>{};
+  String? _noticeMessage;
 
   List<CartItem> get items => _itemsByProductId.values.toList(growable: false);
 
   bool get isEmpty => _itemsByProductId.isEmpty;
 
+  String? get noticeMessage => _noticeMessage;
+
   int get totalItems {
-    return _itemsByProductId.values.fold(
-      0,
-      (sum, item) => sum + item.quantity,
-    );
+    return _itemsByProductId.values.fold(0, (sum, item) => sum + item.quantity);
   }
 
   int get subtotalCents {
@@ -38,12 +38,27 @@ class CartViewModel extends ChangeNotifier {
       return;
     }
 
-    final current = _itemsByProductId[product.id];
-    final nextQuantity = (current?.quantity ?? 0) + amount;
-    _itemsByProductId[product.id] = CartItem(
-      product: product,
-      quantity: nextQuantity,
-    );
+    _mergeProductQuantity(product, amount);
+    notifyListeners();
+  }
+
+  void addItems(Iterable<CartItem> items, {String? noticeMessage}) {
+    var changed = false;
+
+    for (final item in items) {
+      if (item.quantity <= 0) {
+        continue;
+      }
+
+      _mergeProductQuantity(item.product, item.quantity);
+      changed = true;
+    }
+
+    if (!changed) {
+      return;
+    }
+
+    _noticeMessage = noticeMessage;
     notifyListeners();
   }
 
@@ -76,6 +91,25 @@ class CartViewModel extends ChangeNotifier {
     }
 
     _itemsByProductId.clear();
+    _noticeMessage = null;
     notifyListeners();
+  }
+
+  void clearNoticeMessage() {
+    if (_noticeMessage == null) {
+      return;
+    }
+
+    _noticeMessage = null;
+    notifyListeners();
+  }
+
+  void _mergeProductQuantity(HomeProduct product, int amount) {
+    final current = _itemsByProductId[product.id];
+    final nextQuantity = (current?.quantity ?? 0) + amount;
+    _itemsByProductId[product.id] = CartItem(
+      product: product,
+      quantity: nextQuantity,
+    );
   }
 }

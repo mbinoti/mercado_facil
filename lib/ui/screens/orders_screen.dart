@@ -4,6 +4,7 @@ import 'package:app_mercadofacil/ui/platform/platform_ui.dart';
 import 'package:app_mercadofacil/ui/screens/product_details_screen.dart';
 import 'package:app_mercadofacil/ui/widgets/product_visual.dart';
 import 'package:app_mercadofacil/viewmodel/app_shell_viewmodel.dart';
+import 'package:app_mercadofacil/viewmodel/cart_viewmodel.dart';
 import 'package:app_mercadofacil/viewmodel/orders_viewmodel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -475,8 +476,58 @@ class _OrderCard extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            _RepeatOrderButton(order: order),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RepeatOrderButton extends StatelessWidget {
+  const _RepeatOrderButton({required this.order});
+
+  final Order order;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = order.totalItems == 1
+        ? 'Comprar novamente 1 item'
+        : 'Comprar novamente ${order.totalItems} itens';
+
+    if (isCupertinoContext(context)) {
+      return SizedBox(
+        width: double.infinity,
+        child: CupertinoButton.filled(
+          borderRadius: BorderRadius.circular(18),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          onPressed: () => _repeatOrder(context, order),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () => _repeatOrder(context, order),
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color(0xFF2F8B37),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          textStyle: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        icon: const Icon(Icons.replay_rounded),
+        label: Text(label),
       ),
     );
   }
@@ -682,4 +733,12 @@ class _OrderItemRow extends StatelessWidget {
       ),
     );
   }
+}
+
+void _repeatOrder(BuildContext context, Order order) {
+  context.read<CartViewModel>().addItems(
+    order.items,
+    noticeMessage: 'Pedido ${order.code} adicionado ao carrinho.',
+  );
+  context.read<AppShellViewModel>().goTo(AppShellTab.cart);
 }

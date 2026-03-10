@@ -14,15 +14,48 @@ class ProductVisual extends StatelessWidget {
     this.borderRadius = 12,
     this.emojiSize = 70,
     this.padding = const EdgeInsets.all(12),
+    this.preferAssetImage = false,
   });
 
   final HomeProduct product;
   final double borderRadius;
   final double emojiSize;
   final EdgeInsetsGeometry padding;
+  final bool preferAssetImage;
 
   @override
   Widget build(BuildContext context) {
+    if (preferAssetImage) {
+      final primaryAssetPath = 'assets/images/products/${product.id}.png';
+      final emojiAssetPath =
+          'assets/images/products/emoji_${_emojiAssetToken(product.emoji)}.png';
+
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: SizedBox.expand(
+          child: Image.asset(
+            primaryAssetPath,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.high,
+            errorBuilder: (context, error, stackTrace) {
+              return Image.asset(
+                emojiAssetPath,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+                errorBuilder: (context, error, stackTrace) {
+                  return _buildFallbackVisual(context);
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    return _buildFallbackVisual(context);
+  }
+
+  Widget _buildFallbackVisual(BuildContext context) {
     final resolvedPadding = padding.resolve(Directionality.of(context));
 
     return LayoutBuilder(
@@ -144,5 +177,10 @@ class ProductVisual extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _emojiAssetToken(String emoji) {
+    final segments = emoji.runes.map((rune) => 'u${rune.toRadixString(16)}');
+    return segments.join('_');
   }
 }

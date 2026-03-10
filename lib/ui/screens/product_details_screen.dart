@@ -253,6 +253,7 @@ class _DetailsHero extends StatelessWidget {
                   borderRadius: 28,
                   emojiSize: 120,
                   padding: const EdgeInsets.all(20),
+                  preferAssetImage: true,
                 ),
               ),
             ),

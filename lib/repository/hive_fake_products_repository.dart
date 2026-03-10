@@ -13,13 +13,14 @@ class HiveFakeProductsRepository {
 
   static const String boxName = 'fake_products_box';
   static const String _metaKey = '__meta__';
-  static const int _seedVersion = 3;
+  static const int _seedVersion = 4;
 
   static const List<Map<String, Object>> _seedProducts = [
     {
       'type': 'product',
       'id': 'tomate_italiano',
       'sortOrder': 0,
+      'category': 'hortifruti',
       'name': 'Tomate Italiano',
       'details': 'kg',
       'priceCents': 1190,
@@ -31,6 +32,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'kefir_natural',
       'sortOrder': 1,
+      'category': 'bebidas',
       'name': 'Kefir Natural',
       'details': 'garrafa 500ml',
       'priceCents': 1290,
@@ -42,6 +44,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'maca_fuji',
       'sortOrder': 2,
+      'category': 'hortifruti',
       'name': 'Maçã Fuji',
       'details': 'kg',
       'priceCents': 899,
@@ -53,6 +56,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'kiwi_gold',
       'sortOrder': 3,
+      'category': 'hortifruti',
       'name': 'Kiwi Gold',
       'details': 'bandeja 4 un',
       'priceCents': 1349,
@@ -64,6 +68,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'bebida_de_aveia_barista',
       'sortOrder': 4,
+      'category': 'bebidas',
       'name': 'Bebida de Aveia Barista',
       'details': 'caixa 1L',
       'priceCents': 990,
@@ -75,6 +80,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'parmesao_ralado',
       'sortOrder': 5,
+      'category': 'mercearia',
       'name': 'Parmesão Ralado',
       'details': 'pacote 100g',
       'priceCents': 780,
@@ -86,6 +92,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'cappuccino_cremoso',
       'sortOrder': 6,
+      'category': 'bebidas',
       'name': 'Cappuccino Cremoso',
       'details': 'pote 200g',
       'priceCents': 1590,
@@ -97,6 +104,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'quinoa_branca',
       'sortOrder': 7,
+      'category': 'mercearia',
       'name': 'Quinoa Branca',
       'details': 'pacote 500g',
       'priceCents': 1499,
@@ -108,6 +116,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'lentilha_selecionada',
       'sortOrder': 8,
+      'category': 'mercearia',
       'name': 'Lentilha Selecionada',
       'details': 'pacote 500g',
       'priceCents': 689,
@@ -119,6 +128,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'suco_de_uva_integral',
       'sortOrder': 9,
+      'category': 'bebidas',
       'name': 'Suco de Uva Integral',
       'details': 'garrafa 1,5L',
       'priceCents': 1699,
@@ -130,6 +140,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'brioche_artesanal',
       'sortOrder': 10,
+      'category': 'padaria',
       'name': 'Brioche Artesanal',
       'details': 'pacote 400g',
       'priceCents': 1149,
@@ -141,6 +152,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'coxa_sobrecoxa',
       'sortOrder': 11,
+      'category': 'proteinas',
       'name': 'Coxa e Sobrecoxa',
       'details': 'bandeja 1kg',
       'priceCents': 1390,
@@ -152,6 +164,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'salmao_em_postas',
       'sortOrder': 12,
+      'category': 'proteinas',
       'name': 'Salmão em Postas',
       'details': 'bandeja 500g',
       'priceCents': 3690,
@@ -163,6 +176,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'limpador_multiuso_citrus',
       'sortOrder': 13,
+      'category': 'limpeza',
       'name': 'Limpador Multiuso Citrus',
       'details': 'frasco 500ml',
       'priceCents': 579,
@@ -174,6 +188,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'guardanapo_folha_dupla',
       'sortOrder': 14,
+      'category': 'limpeza',
       'name': 'Guardanapo Folha Dupla',
       'details': 'pacote 50 un',
       'priceCents': 429,
@@ -185,6 +200,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'shampoo_hidratante',
       'sortOrder': 15,
+      'category': 'higiene',
       'name': 'Shampoo Hidratante',
       'details': 'frasco 350ml',
       'priceCents': 1490,
@@ -196,6 +212,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'cookie_chocolate',
       'sortOrder': 16,
+      'category': 'lanches',
       'name': 'Cookie de Chocolate',
       'details': 'caixa 120g',
       'priceCents': 659,
@@ -207,6 +224,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'mix_de_castanhas',
       'sortOrder': 17,
+      'category': 'lanches',
       'name': 'Mix de Castanhas',
       'details': 'pacote 250g',
       'priceCents': 1990,
@@ -218,6 +236,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'agua_de_coco',
       'sortOrder': 18,
+      'category': 'bebidas',
       'name': 'Água de Coco',
       'details': 'garrafa 1L',
       'priceCents': 839,
@@ -229,6 +248,7 @@ class HiveFakeProductsRepository {
       'type': 'product',
       'id': 'ovos_jumbo',
       'sortOrder': 19,
+      'category': 'proteinas',
       'name': 'Ovos Jumbo',
       'details': 'cartela 10 un',
       'priceCents': 1399,
@@ -373,8 +393,8 @@ class HiveFakeProductsRepository {
       return;
     }
 
-    if (hasCatalogEntries && (savedVersion == null || savedVersion < 3)) {
-      await _migrateSeedData();
+    if (hasCatalogEntries && (savedVersion == null || savedVersion < 4)) {
+      await _migrateSeedData(savedVersion: savedVersion);
       return;
     }
 
@@ -415,7 +435,25 @@ class HiveFakeProductsRepository {
     await _box.delete(id);
   }
 
-  static Future<void> _migrateSeedData() async {
+  static Future<void> _migrateSeedData({int? savedVersion}) async {
+    if (savedVersion == null || savedVersion < 4) {
+      for (final product in _seedProducts) {
+        final id = product['id']! as String;
+        final persisted = _box.get(id);
+        if (persisted == null) {
+          await _box.put(id, product);
+          continue;
+        }
+
+        final normalized = Map<String, dynamic>.from(persisted);
+        normalized.putIfAbsent('category', () => product['category']);
+
+        if (!mapEquals(persisted, normalized)) {
+          await _box.put(id, normalized);
+        }
+      }
+    }
+
     for (final banner in _seedPromotionalBanners) {
       final id = banner['id']! as String;
       if (!_box.containsKey(id)) {

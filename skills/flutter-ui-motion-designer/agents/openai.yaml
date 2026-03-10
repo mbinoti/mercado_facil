@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flutter UI Motion Designer"
+  short_description: "Flutter UI e motion design para telas fortes"
+  default_prompt: "Use $flutter-ui-motion-designer para criar ou refinar uma tela Flutter com direção visual forte e animações intencionais."

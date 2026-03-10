@@ -1,4 +1,4 @@
-# Flutter Specialist
+# Especialista Flutter
 
 ## Missão
 Implementar e refatorar funcionalidades Flutter no dia a dia com foco em:
@@ -15,8 +15,8 @@ Implementar e refatorar funcionalidades Flutter no dia a dia com foco em:
 - Criação de features novas seguindo o padrão do projeto.
 
 ## Contexto obrigatório antes de codar
-- Regras de negócio e UX: `docs/product/project-context.md`
-- Estrutura arquitetural: `docs/architecture/folder_structure.md`
+- Regras de negócio e UX: `docs/project-context.md`
+- Estrutura arquitetural: `docs/folder_structure.md`
 
 Se esses arquivos não existirem, pergunte onde estão OU crie placeholders mínimos e siga o padrão descrito abaixo.
 
@@ -154,7 +154,7 @@ Se o projeto já tiver padrão de mocks (mocktail/mockito), seguir o padrão exi
 ---
 
 ## Prompt base para este agente
-Atue como Flutter Specialist.
+Atue como Especialista Flutter.
 Tarefa: <descreva a feature/refatoracao>
 
 Requisitos:
